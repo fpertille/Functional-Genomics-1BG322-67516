@@ -1,0 +1,67 @@
+###################################################################################################################################################################################################
+##### This is the command we used for one type of filtering, here you can see the filter for trimming adapters, poliG > 2 and part of the read that on average does not have > 20 phred score #####
+###################################################################################################################################################################################################
+
+module load bioinfo-tools
+module load fastp
+
+fastp --in1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/Undetermined/Undetermined_S1_L001_R1_001.fastq.gz --in2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/Undetermined/Undetermined_S1_L001_R2_001.fastq.gz --out1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_q20_nopoliG/MeDIP.R1.q20.nopoliG.fastq.gz --out2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_q20_nopoliG/MeDIP.R2.q20.nopoliG.fastq.gz -z 4 --detect_adapter_for_pe --poly_g_min_len 2 --cut_right_mean_quality 20 --cut_right -h /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/MeDIP.q20.nopoliG
+
+##################################################################################################################################################
+##### This is the command we used for another type of filtering, here you can see the filter for trimming adapters and trimming of poliG > 2 #####
+##################################################################################################################################################
+
+module load bioinfo-tools
+module load fastp
+
+fastp --in1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/Undetermined/Undetermined_S1_L001_R1_001.fastq.gz --in2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/Undetermined/Undetermined_S1_L001_R2_001.fastq.gz --out1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_nopoliG/MeDIP.R1.nopoliG.fastq.gz --out2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_nopoliG/MeDIP.R2.nopoliG.fastq.gz -z 4 --detect_adapter_for_pe --poly_g_min_len 2 -h /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/MeDIP.nopoliG.html
+
+########################################################################################################################
+##### This is the command we used for another type of filtering, here you can see the filter for trimming adapters #####
+########################################################################################################################
+
+module load bioinfo-tools
+module load fastp
+
+fastp --thread 4 --in1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/Undetermined/Undetermined_S1_L001_R1_001.fastq.gz --in2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/Undetermined/Undetermined_S1_L001_R2_001.fastq.gz --out1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_adaptertrimming/MeDIP.R1.fastq.gz --out2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_adaptertrimming/MeDIP.R2.fastq.gz -z 4 --detect_adapter_for_pe -h /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/MedIP.adaptertrimming.html
+
+###### For these fastq that we have created we can grep GGGGG and the sequence of the common adapter to see how many poliGs and adapters we still have, when you run fastQC and then MultiQC on these fastq files you can get the avg, min and max read length on the mqc_fastqc_sequence_length_distribution_plot_1.txt which is a file created from the MultiQC report
+
+#######################################################################################################################################
+##### This is the command we used for demultiplexing, you would need to change the input file as we don't want to make it chaotic #####
+#######################################################################################################################################
+
+module load bioinfo-tools
+module load Stacks/2.62
+
+process_radtags -P -1 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_adaptertrimming/MeDIP.R1.fastq.gz -2 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/fastq/fastq_adaptertrimming/MeDIP.R2.fastq.gz -o /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/samples/adaptertrimmed.demultiplexed -b /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/barcodes/barcode.txt -e pstI -r -q -c
+
+#################################################################################################################################
+##### This is the command we used for aligning, you would need to change the input file as we don't want to make it chaotic #####
+#################################################################################################################################
+
+module load bioinfo-tools
+module load bowtie2/2.4.5
+
+
+for i in $(cat /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/samples/adaptertrimmed.demultiplexed/fastq.list.txt) ;
+
+do bowtie2 --threads 10  --very-sensitive-local -x /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/reference.genome/GCF_000001635.27_GRCm39_genomic -1 $i -2 ${i%%.1.fq.gz}.2.fq.gz -U ${i%%.1.fq.gz}.rem.1.fq.gz -U ${i%%.1.fq.gz}.rem.2.fq.gz -S ${i%%.1.fq.gz}.sam ;
+
+done
+
+##############################################################################################################################################################################
+##### This is the command we used for getting the concordant alignments from the SAM files , you would need to change the input file as we don't want to make it chaotic #####
+##############################################################################################################################################################################
+
+grep YT:Z:CP C13F2_21_CO_sorted_reheader.sam > concordant_alignment_C13F2_21_CO_sorted_reheader
+
+###############################################################################################################################################################################
+##### This is the command we used for getting the observed template size from the SAM files , you would need to change the input file as we don't want to make it chaotic #####
+###############################################################################################################################################################################
+
+cut -f 9 concordant_alignment_C13F2_21_CO_sorted_reheader > outputfile
+
+
+
+##### This code was used in UPPMAX, a server from Uppsala university #####
