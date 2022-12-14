@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# There has to be hard links otherwise it does not work, this is a file that contains millions of line that head, wc and such cannot handle them in variables (I tried, it did not work)
+
+#i=$(cat /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows_mm10.gff)
+
+# extracting the header of the gff file
+head -n 3 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows_mm10.gff > /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/header.txt
+
+#get the gff file without the header
+sed '1,3d' /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows_mm10.gff > /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt
+
+#i=$(cat /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt)
+
+#Creating a file with the ID name for as many times as cut you have in the ggf file | COLUMN 9
+START=1
+END=$(wc -l < /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt)
+echo $END
+for (( c=$START; c<=$END; c++ ))
+do
+    echo "ID=$c;gene_id=$c;"
+    sleep 1
+done > /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/columns9.txt
+
+paste /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/columns9.txt >> /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/header.txt
+mv /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/header.txt /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows.curated.mm10.gff
