@@ -12,7 +12,7 @@ sed '1,3d' /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_s
 
 #i=$(cat /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt)
 
-#Creating a file with the ID name for as many times as cut you have in the ggf file | COLUMN 9
+#Creating a file with the ID name for as many times as windows you have in the ggf file | COLUMN 9
 START=1
 END=$(wc -l < /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt)
 echo $END
