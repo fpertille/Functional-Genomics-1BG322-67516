@@ -1,26 +1,26 @@
 #!/bin/bash
 
 # There has to be hard links otherwise it does not work, this is a file that contains millions of line that head, wc and such cannot handle them in variables (I tried, it did not work)
-
-#i=$(cat /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows_mm10.gff)
+# be aware that the name has to be exactly the same, only thing that can change is the j variable
+#path to the folder
+i=/crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files
+#code for the reference genome in use
+j=mm10
 
 # extracting the header of the gff file
-head -n 3 /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows_mm10.gff > /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/header.txt
+head -n 3 $i/in_silico_windows_$j.gff > $i/header.txt
 
-#get the gff file without the header
-sed '1,3d' /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows_mm10.gff > /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt
+# get the gff file without the header
+sed '1,3d' $i/in_silico_windows_$j.gff > $i/raw_windows.txt
 
-#i=$(cat /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt)
-
-#Creating a file with the ID name for as many times as windows you have in the ggf file | COLUMN 9
+#Creating a file with the ID name for as many times as cut you have in the ggf file | COLUMN 9
 START=1
-END=$(wc -l < /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt)
+END=$(wc -l < $i/raw_windows.txt)
 echo $END
 for (( c=$START; c<=$END; c++ ))
 do
     echo "ID=$c;gene_id=$c;"
-    sleep 1
-done > /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/columns9.txt
+done > $i/columns9.txt
 
-paste /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/raw_windows.txt /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/columns9.txt >> /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/header.txt
-mv /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/header.txt /crex/proj/ancestry_medi_indiv/MouseGBSFabio/MouseTest/gff_files/in_silico_windows.curated.mm10.gff
+paste $i/raw_windows.txt $i/columns9.txt >> $i/header.txt
+mv $i/header.txt $i/in_silico_windows.curated.$j.gff
