@@ -1,0 +1,486 @@
+---
+title: "Statistical_benchmarking"
+author: "Violeta de Anca"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Benchmarking of different models and approaches to analyze GBS-MeDIP data
+
+Let us start by setting the working directory and loading the packages:
+```{r}
+#setwd("C:/Users/viode560/Documents/statistics_work")
+#BiocManager::install("edgeR")
+#install.packages("statmod")
+library(statmod)
+library("edgeR")
+library(tidyverse)
+library(gsubfn)
+library(ggcats)
+library(ggplot2)
+library(dplyr)
+library(tibble)
+library(tidyverse)
+library(stringr)
+library(palmerpenguins)
+```
+
+First load the data
+```{r}
+count.table.RBC = read.table("C:/Users/viode560/Documents/statistics_work/count_matrix/counts.RBC.galgal7.txt", sep="\t", header=TRUE)
+count.table.RBC=count.table.RBC%>%filter(Length<719)
+count.table.RBC=count.table.RBC%>%filter(Length>31)
+ind.chicken=read.csv("C:/Users/viode560/Documents/info_geronimo_project/EpiAllInfo_comma.csv",sep = ";")
+ind.chicken=ind.chicken[,c(1,41)]
+count.table.RBC$Geneid=lapply(count.table.RBC$Geneid, function(x) paste('window', x))
+count.table.RBC$Geneid= gsub(" ","_", count.table.RBC$Geneid)
+colnames(count.table.RBC)<- gsub(pattern = "X.proj.gbs_medip.GEroNIMO.analysis.VI.3422.Aligned.gal7.RBC.", replacement = "", x = colnames(count.table.RBC))
+colnames(count.table.RBC)<- gsub(pattern = ".sorted.bam", replacement = "", x = colnames(count.table.RBC))
+ind.RBC=colnames(count.table.RBC)
+ind.RBC=ind.RBC[-c(1:11,177:186)]
+ind.RBC=gsub(pattern = "RBC_", replacement = "", x = ind.RBC)
+ind.RBC=gsub(pattern = "^0", replacement = "", x = ind.RBC)
+ind.RBC=gsub(pattern = "^0", replacement = "", x = ind.RBC)
+ind.RBC=as.data.frame(ind.RBC)
+colnames(ind.chicken)=c("ind","blindtreatment")
+ind.chicken$ind=as.character(ind.chicken$ind)
+colnames(ind.RBC)=c("ind")
+design.list=left_join(ind.RBC, ind.chicken, by = "ind")
+design.list=design.list[-c(1:6,146),]
+```
+
+Let us subset the columns that we are interested in, that is, the window number and the counts. RBC_154 has been excluded as it does not have a grouping factor. In order to match the individual with the group I will left join 2 different matrix.
+```{r}
+edgeR.RBC <- DGEList(counts=count.table.RBC[,c(18:156,158:176)], genes=count.table.RBC[,1])
+rownames(edgeR.RBC$counts) <- rownames(edgeR.RBC$genes) <- edgeR.RBC$genes$genes
+```
+Now we have stored the data as a type of object called DGE list. In this list there is information such as the counts, the individuals name and the window identifier.
+
+EdgeR normalize each individual by the number of total counts each one had. Nevertheless the normalization is usually done by number of reads for each library. It is also recommended to perform the normalization with edgeR::voomLmFit when having medium to high zero counts in the matrix.
+```{r}
+#voomLmFit()
+edgeR.RBC$samples$lib.size <- colSums(edgeR.RBC$counts)
+edgeR.RBC <- calcNormFactors(edgeR.RBC)
+```
+
+EdgeR gives us the possibility to have a plot-like-PCA to see how our individuals are distanced between different methylation profiles. This plot is called multidimensional scaling plot.
+```{r}
+plotMDS(edgeR.RBC)
+```
+
+Now let us design the matrix for the model. This matrix is an additive matrix.
+For this experiment as is double blind, we have 2 different groups: crocodiles and elephants.
+```{r}
+design.RBC=model.matrix(~design.list$blindtreatment)
+```
+
+Now from here EdgeR allow us to test different approaches when it comes to calculate the parameters for the best fitting of the negative binomial distribution to our data.
+
+First we are going to estimate the dispersion and see how GBS-MeDIP data behaves.
+```{r}
+edgeR.RBC <- estimateDisp(edgeR.RBC, design.RBC)
+```
+
+After this we can see the biological coefficient variation.
+```{r}
+A <- edgeR.RBC$AveLogCPM
+disp <- getDispersion(edgeR.RBC)
+if (attr(disp, "type") == "common") 
+  disp <- rep_len(disp, length(A))
+plot(A, sqrt(disp), xlab = "Average log CPM", ylab = "Biological coefficient of variation")
+labels <- cols <- lty <- pt <- NULL
+col.tagwise = "black"
+pch=10
+if (!is.null(edgeR.RBC$tagwise.dispersion)) {
+  points(A, sqrt(edgeR.RBC$tagwise.dispersion), pch = 10, cex = 1, 
+         col = col.tagwise)
+  labels <- c(labels, "Tagwise")
+  cols <- c(cols, col.tagwise)
+  lty <- c(lty, -1)
+  pt <- c(pt, pch)
+}
+col.common = "red"
+col.trend = "blue"
+if (!is.null(edgeR.RBC$common.dispersion)) {
+  abline(h = sqrt(edgeR.RBC$common.dispersion), col = col.common, 
+         lwd = 2)
+  labels <- c(labels, "Common")
+  cols <- c(cols, col.common)
+  lty <- c(lty, 1)
+  pt <- c(pt, -1)
+}
+if (!is.null(edgeR.RBC$trended.dispersion)) {
+  o <- order(A)
+  lines(A[o], sqrt(edgeR.RBC$trended.dispersion)[o], col = col.trend, 
+        lwd = 2)
+  labels <- c(labels, "Trend")
+  cols <- c(cols, col.trend)
+  lty <- c(lty, 1)
+  pt <- c(pt, -1)
+}
+cex = 1
+legend("topright", legend = labels, lty = lty, pch = pt, 
+       pt.cex = cex, lwd = 2, col = cols)
+```
+[insertar aqui explication sobre el BCV]
+
+Now that the descriptive statistics are done, let us start with the different statistical approaches.
+[insertar aqui explication sobre q este tipo de datos sigue una negative binomial]
+
+## Negative binomial distribution
+
+### Maximum-likelihood approach for calculating the coefficients
+
+```{r}
+model.fit.RBC=glmFit(edgeR.RBC, design.RBC)
+```
+
+Now do likelihood ratio tests to see which ROIS are differentialy methylated
+```{r}
+like.ratio.RBC = glmLRT(model.fit.RBC)
+```
+
+Get a visual plot to see up methylation and down methylation
+```{r}
+plotMD(like.ratio.RBC)
+abline(h=c(-1, 1), col="blue")
+```
+
+Do the False Discovery Rate
+```{r}
+top.RBC=topTags(like.ratio.RBC, n=length(edgeR.RBC$genes$genes), adjust.method = "fdr")
+summary(decideTests(like.ratio.RBC))
+```
+
+Now extract the coefficients with the p-values from the maximum likelihood ratio test
+```{r}
+coeff.like.ratio.RBC=like.ratio.RBC[["table"]]
+coeff.0.05.like.ratio.RBC=coeff.like.ratio.RBC[(coeff.like.ratio.RBC$PValue<0.05),]
+```
+
+Negative binomial maximum-likelihood p-values histogram
+```{r}
+histogr.RBC=hist(coeff.like.ratio.RBC$PValue, xlab = "p-values", main = "p-values of Negative binomial maximum-likelihood from red blood cells")
+densi.RBC=density(coeff.like.ratio.RBC$PValue)
+multi.RBC=histogr.RBC$counts/histogr.RBC$density
+densi.RBC$y=densi.RBC$y*multi.F1[1]
+lines(densi.RBC)
+```
+
+### Winsorized Negative Binomial model
+```{r}
+model.winsorized.fit.RBC=glmFit(edgeR.RBC, design.RBC, winsor.tail.p=c(0.1,0.1))
+```
+
+Now do likelihood ratio tests to see which windows are differentially methylated
+```{r}
+like.winsorized.ratio.RBC = glmLRT(model.fit.RBC)
+```
+
+Get a visual plot to see up methylation and down methylation
+```{r}
+plotMD(like.winsorized.ratio.RBC)
+abline(h=c(-1, 1), col="blue")
+```
+
+Do the FDR
+```{r}
+top.winsorized.RBC=topTags(like.winsorized.ratio.RBC, n=length(edgeR.RBC$genes$genes), adjust.method = "fdr")
+summary(decideTests(like.winsorized.ratio.RBC))
+```
+
+Now extract the coefficients with the p-values from the maximum likelihood ratio test
+```{r}
+coeff.like.winsorized.ratio.RBC=like.winsorized.ratio.RBC[["table"]]
+coeff.0.05.like.winsorized.ratio.RBC=coeff.like.winsorized.ratio.RBC[(coeff.like.winsorized.ratio.RBC$PValue<0.05),]
+```
+
+Negative binomial winsorized mean p-values histogram
+```{r}
+histogr.winsorized.RBC=hist(coeff.like.winsorized.ratio.RBC$PValue, xlab = "p-values", main = "p-values of Negative binomial EdgeR")
+densi.winsorized.RBC=density(coeff.like.winsorized.ratio.RBC$PValue)
+multi.winsorized.RBC=histogr.winsorized.RBC$counts/histogr.winsorized.RBC$density
+densi.winsorized.RBC$y=densi.winsorized.RBC$y*multi.winsorized.RBC[1]
+lines(densi.winsorized.RBC)
+```
+
+## Fit the quasi-likelihood Negative Binomial model
+```{r}
+model.quasi.fit.RBC=glmQLFit(edgeR.RBC, design.RBC)
+```
+
+Now do quasi-likelihood ratio tests to see which ROIS are DE
+```{r}
+quasi.like.ratio.RBC = glmQLFTest(model.quasi.fit.RBC, coef = 2)
+```
+
+Get a visual plot to see up methylation and down methylation
+```{r}
+plotMD(quasi.like.ratio.RBC)
+abline(h=c(-1, 1), col="blue")
+```
+
+Do the False Discovery Rate
+```{r}
+top.quasi.RBC=topTags(quasi.like.ratio.RBC, n=length(edgeR.RBC$genes$genes), adjust.method = "fdr")
+topTags(quasi.like.ratio.RBC)
+FDR.quasi.like.ratio.RBC=decideTests(quasi.like.ratio.RBC, adjust.method = "fdr",p.value=0.05)
+summary(decideTests(quasi.like.ratio.RBC))
+```
+
+Now extract the coefficients with the p-values from the quasi-likelihood test
+```{r}
+coeff.quasi.like.ratio.RBC=quasi.like.ratio.RBC[["table"]]
+coeff.0.05.quasi.like.ratio.RBC=coeff.quasi.like.ratio.RBC[(coeff.quasi.like.ratio.RBC$PValue<0.05),]
+coeff.0.01.quasi.like.ratio.RBC=coeff.quasi.like.ratio.RBC[(coeff.quasi.like.ratio.RBC$PValue<0.01),]
+coeff.0.005.quasi.like.ratio.RBC=coeff.quasi.like.ratio.RBC[(coeff.quasi.like.ratio.RBC$PValue<0.005),]
+```
+
+Extract the corrected p-values after FDR
+```{r}
+coeff.corrected.quasi.like.ratio.RBC=as.data.frame(top.quasi.RBC[["table"]])
+coeff.0.005.corrected.quasi.like.ratio.RBC=coeff.corrected.quasi.like.ratio.RBC[(coeff.corrected.quasi.like.ratio.RBC$PValue<0.005 & coeff.corrected.quasi.like.ratio.RBC$FDR<0.05),]
+coeff.0.01.corrected.quasi.like.ratio.RBC=coeff.corrected.quasi.like.ratio.RBC[(coeff.corrected.quasi.like.ratio.RBC$PValue<0.01 & coeff.corrected.quasi.like.ratio.RBC$FDR<0.05),]
+coeff.0.05.corrected.quasi.like.ratio.RBC=coeff.corrected.quasi.like.ratio.RBC[(coeff.corrected.quasi.like.ratio.RBC$PValue<0.05 & coeff.corrected.quasi.like.ratio.RBC$FDR<0.05),]
+```
+
+Quasi-likelihood negative binomial p-values histogram
+```{r}
+histogr.RBC=hist(coeff.quasi.like.ratio.RBC$PValue, xlab = "p-values", main = "p-values of Quasi-likelihood negative binomial from Red Blood Cells")
+densi.RBC=density(coeff.quasi.like.ratio.RBC$PValue)
+multi.RBC=histogr.RBC$counts/histogr.RBC$density
+densi.RBC$y=densi.RBC$y*multi.RBC[1]
+lines(densi.RBC)
+```
+
+### Fit the quasi-likelihood-NB model with the winsorized mean
+```{r}
+model.quasi.rob.fit.RBC=glmQLFit(edgeR.RBC, design.RBC,winsor.tail.p=c(0.1,0.1))
+```
+
+Now do quasi-likelihood ratio tests to see which ROIS are DE
+```{r}
+quasi.rob.like.ratio.RBC = glmQLFTest(model.quasi.rob.fit.RBC, coef = 2)
+```
+
+Get a visual plot to see up methylation and down methylation
+```{r}
+plotMD(quasi.rob.like.ratio.RBC)
+abline(h=c(-1, 1), col="blue")
+```
+
+Do the False Discovery Rate
+```{r}
+top.quasi.rob.RBC=topTags(quasi.rob.like.ratio.RBC, n=length(edgeR.RBC$genes$genes), adjust.method = "fdr")
+topTags(quasi.rob.like.ratio.RBC)
+FDR.quasi.rob.like.ratio.RBC=decideTests(quasi.rob.like.ratio.RBC, adjust.method = "fdr",p.value=0.05)
+summary(decideTests(quasi.rob.like.ratio.RBC))
+```
+
+Now extract the coefficients with the p-values from the likelihood ratio test and the quasi-likelihood test
+```{r}
+coeff.quasi.rob.like.ratio.RBC=quasi.rob.like.ratio.RBC[["table"]]
+coeff.0.05.quasi.rob.like.ratio.RBC=coeff.quasi.rob.like.ratio.RBC[(coeff.quasi.rob.like.ratio.RBC$PValue<0.05),]
+coeff.0.01.quasi.rob.like.ratio.RBC=coeff.quasi.rob.like.ratio.RBC[(coeff.quasi.rob.like.ratio.RBC$PValue<0.01),]
+coeff.0.005.quasi.rob.like.ratio.RBC=coeff.quasi.rob.like.ratio.RBC[(coeff.quasi.rob.like.ratio.RBC$PValue<0.005),]
+```
+
+Extract the corrected p-values after FDR
+```{r}
+coeff.corrected.quasi.rob.like.ratio.RBC=as.data.frame(top.quasi.rob.RBC[["table"]])
+coeff.0.005.corrected.quasi.rob.like.ratio.RBC=coeff.corrected.quasi.rob.like.ratio.RBC[(coeff.corrected.quasi.rob.like.ratio.RBC$PValue<0.005 & coeff.corrected.quasi.rob.like.ratio.RBC$FDR<0.05),]
+coeff.0.01.corrected.quasi.rob.like.ratio.RBC=coeff.corrected.quasi.rob.like.ratio.RBC[(coeff.corrected.quasi.rob.like.ratio.RBC$PValue<0.01 & coeff.corrected.quasi.rob.like.ratio.RBC$FDR<0.05),]
+coeff.0.05.corrected.quasi.rob.like.ratio.RBC=coeff.corrected.quasi.rob.like.ratio.RBC[(coeff.corrected.quasi.rob.like.ratio.RBC$PValue<0.05 & coeff.corrected.quasi.rob.like.ratio.RBC$FDR<0.05),]
+```
+
+## Different variants
+
+There are several thing that can be done to handle the disparity between the mean and the variance
+```{r}
+edgeR.robust.RBC.rob <- estimateDisp(edgeR.robust.RBC.rob, design.RBC.rob, robust=TRUE)
+```
+
+Estimate with the new dispersion the biological coefficient of variation
+```{r}
+labels=c()
+A <- edgeR.robust.RBC.rob$AveLogCPM
+disp <- getDispersion(edgeR.robust.RBC.rob)
+if (attr(disp, "type") == "common") 
+  disp <- rep_len(disp, length(A))
+plot(A, sqrt(disp), xlab = "Average log CPM",ylab = "Biological coefficient of variation", cex.lab = 1.5,cex.axis = 2)
+points(A, sqrt(edgeR.robust.RBC.rob$tagwise.dispersion), pch = 16, col = "black",cex=1.5,lwd=2)
+abline(h = sqrt(edgeR.robust.RBC.rob$common.dispersion), col = "#b01c2e", lwd = 4)
+legend("topright", legend = c("Average"), lwd = 4, cex = 1.5, col = c("#b01c2e"),xjust=0,yjust = 0,text.width=0.2,adj=0.5)
+```
+
+Fit the Negative Binomial model
+```{r}
+rob.model.fit.RBC.rob=glmFit(edgeR.robust.RBC.rob, design.RBC.rob)
+```
+
+Now do likelihood ratio tests to see which windows are differentially methylated
+```{r}
+robust.like.ratio.RBC.rob = glmLRT(rob.model.fit.RBC.rob)
+```
+
+Get a visual plot to see up methylation and down methylation
+```{r}
+plotMD(robust.like.ratio.RBC.rob)
+abline(h=c(-1, 1), col="blue")
+```
+
+Do the FDR
+```{r}
+top.RBC.rob=topTags(robust.like.ratio.RBC.rob, n=length(edgeR.RBC$genes$genes), adjust.method = "fdr")
+summary(decideTests(robust.like.ratio.RBC.rob))
+```
+
+Now extract the coefficients with the p-values from the maximum likelihood ratio test
+```{r}
+coeff.like.ratio.RBC.rob=like.ratio.RBC.rob[["table"]]
+coeff.0.05.like.ratio.RBC.rob=coeff.like.ratio.RBC.rob[(coeff.like.ratio.RBC.rob$PValue<0.05),]
+coeff.0.01.like.ratio.RBC.rob=coeff.like.ratio.RBC.rob[(coeff.like.ratio.RBC.rob$PValue<0.01),]
+coeff.0.005.like.ratio.RBC.rob=coeff.like.ratio.RBC.rob[(coeff.like.ratio.RBC.rob$PValue<0.005),]
+```
+
+Negative binomial p-values histogram
+```{r}
+histogr.RBC.rob=hist(coeff.like.ratio.RBC.rob$PValue, breaks = 20, xlab = "p-values",lwd=2,cex.lab = 1.5,cex.axis = 1.5, main = "")
+densi.RBC.rob=density(coeff.like.ratio.RBC.rob$PValue)
+multi.RBC.rob=histogr.RBC.rob$counts/histogr.RBC.rob$density
+densi.RBC.rob$y=densi.RBC.rob$y*multi.RBC.rob[1]
+lines(densi.RBC.rob)
+```
+
+
+## Fit the Winsorized Negative Binomial model
+```{r}
+model.winsorized.fit.RBC.rob=glmFit(edgeR.robust.RBC.rob, design.RBC.rob, winsor.tail.p=c(10,10))
+```
+
+
+Now do likelihood ratio tests to see which ROIS are DE
+```{r}
+like.winsorized.ratio.RBC.rob = glmLRT(model.fit.RBC.rob)
+
+```
+
+
+Get a visual plot to see up methylation and down methylation
+```{r}
+plotMD(like.winsorized.ratio.RBC.rob)
+abline(h=c(-1, 1), col="blue")
+```
+
+
+Do the FDR
+```{r}
+top.winsorized.RBC.rob=topTags(like.winsorized.ratio.RBC.rob, n=length(edgeR.RBC$genes$genes), adjust.method = "fdr")
+summary(decideTests(like.winsorized.ratio.RBC.rob))
+```
+
+Now extract the coefficients with the p-values from the maximum likelihood ratio test
+```{r}
+coeff.like.winsorized.ratio.RBC.rob=like.winsorized.ratio.RBC.rob[["table"]]
+coeff.0.05.like.winsorized.ratio.RBC.rob=coeff.like.winsorized.ratio.RBC.rob[(coeff.like.winsorized.ratio.RBC.rob$PValue<0.05),]
+
+```
+
+Negative binomial winsorized mean p-values histogram
+```{r}
+histogr.winsorized.RBC.rob=hist(coeff.like.winsorized.ratio.RBC.rob$PValue, xlab = "p-values from RBC", main = "p-values of Negative binomial winsorized mean from RBC")
+densi.winsorized.RBC.rob=density(coeff.like.winsorized.ratio.RBC.rob$PValue)
+multi.winsorized.RBC.rob=histogr.winsorized.RBC.rob$counts/histogr.winsorized.RBC.rob$density
+densi.winsorized.RBC.rob$y=densi.winsorized.RBC.rob$y*multi.winsorized.RBC.rob[1]
+lines(densi.winsorized.RBC.rob)
+```
+
+# Now, this goes with the same script as above, before the robust dispersion, i don't know if you want to just repeat the same code or put it in a way were you can choose between different dispersions and then is the same script.
+
+
+## Non-parametric approach
+
+In the non-parametric approach the relationship between the mean and the median does not exist.
+```{r}
+count.table.nonp.RBC= count.table.RBC[,c(18:156,158:176)]
+count.table.nonp.RBC = t(count.table.nonp.RBC)
+count.table.nonp.RBC=as.data.frame(count.table.nonp.RBC)
+inv.row.non=rownames(count.table.nonp.RBC)
+inv.row.non=gsub(pattern = "RBC_", replacement = "", x = inv.row.non)
+inv.row.non=gsub(pattern = "^0", replacement = "", x = inv.row.non)
+inv.row.non=gsub(pattern = "^0", replacement = "", x = inv.row.non)
+inv.row.non=as.data.frame(inv.row.non)
+colnames(design.list)=c("inv.row.non","blindtreatment")
+count.table.nonp.RBC= cbind(inv.row.non,count.table.nonp.RBC)
+count.table.nonp.RBC= left_join(count.table.nonp.RBC, design.list, by="inv.row.non")
+row.names(count.table.nonp.RBC)=count.table.nonp.RBC[,159]
+count.table.nonp.RBC=count.table.nonp.RBC[,2:158]
+```
+
+
+Do mann whitney test for all of the ROIs
+```{r}
+list.mann.whitney.RBC=list()
+for (i in 1:ncol(count.table.nonp.RBC)) {
+  counts.window.RBC=count.table.nonp.RBC[,i]
+  test.RBC.window=data.frame(design.list$blindtreatment,counts.window.RBC)
+  out = wilcox.test(test.RBC.window$counts.window~test.RBC.window$blindtreatment)
+  list.mann.whitney.RBC[[i]]=out
+}
+```
+
+Now that you have the list  extract the p-values retaining the window
+```{r}
+df.F1=as.data.frame(do.call(cbind, list.mann.whitney.F1))
+df.F1=t(df.F1)
+df.F1=as.data.frame(df.F1)
+p.values.F1=list(df.F1$p.value)
+p.values.F1=unlist(p.values.F1)
+p.values.F1=as.data.frame(p.values.F1)
+colnames(p.values.F1)=c("p_value")
+p.values.F1= cbind(p.values.F1, first.col.F1[])
+```
+
+Do subseting for 0.05, 0.01 and 0.005
+```{r}
+ceropointceroceroFive.F1 = subset(p.values.F1, p_value<0.005)
+ceropointceroceroFive.F1
+ceropointceroceroFive.F1 <- cbind(rownames(ceropointceroceroFive.F1), data.frame(ceropointceroceroFive.F1, row.names=NULL))
+colnames(ceropointceroceroFive.F1)=c("Window","p-value")
+nrow(ceropointceroceroFive.F1)
+ceropointceroOne.F1 = subset(p.values.F1, p_value<0.01)
+ceropointceroOne.F1
+ceropointceroOne.F1 <- cbind(rownames(ceropointceroOne.F1), data.frame(ceropointceroOne.F1, row.names=NULL))
+colnames(ceropointceroOne.F1)=c("Window","p-value")
+nrow(ceropointceroOne.F1)
+ceropointceroFive.F1 = subset(p.values.F1, p_value<0.05)
+ceropointceroFive.F1
+ceropointceroFive.F1 <- cbind(rownames(ceropointceroFive.F1), data.frame(ceropointceroFive.F1, row.names=NULL))
+colnames(ceropointceroFive.F1)=c("Window","p-value")
+nrow(ceropointceroFive.F1)
+```
+
+# Permutation test here
+
+
+
+
+
+
+
+
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+
+
+
+
