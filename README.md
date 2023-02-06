@@ -20,5 +20,3 @@ iv) generate a final spreadsheet that compiles all the information generated.
 On behalf of Carlos, Violeta, Manolis, and me.
 Best regards, 
 
-
-## First ~in silico~ digestion
