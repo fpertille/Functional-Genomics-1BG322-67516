@@ -1,16 +1,22 @@
-##############################################################################################################################################################################
-##### This is the command we used for getting the concordant alignments from the SAM files , you would need to change the input file as we don't want to make it chaotic #####
-##############################################################################################################################################################################
+################################################################################################
+##### This is the command we used for getting the concordant alignments from the SAM files #####
+################################################################################################
+module load bioinfo-tools
+module load samtools
 
-grep YT:Z:CP C13F2_21_CO_sorted_reheader.sam > concordant_alignment_C13F2_21_CO_sorted_reheader
+a=/path/to/bam/list/bam.list.txt
+b=/path/to/results
+c=name_for_file_containing_concordant_alignments.txt
+d=name_for_template_size.txt
 
-#Alternative to use the bam file
-#module load bioinfo-tools
-#module load samtools
-#samtools view C13F2_21_CO_sorted_reheader.bam | grep YT:Z:CP > concordant_alignment_C13F2_21_CO_sorted_reheader
+for i in $(cat $a);
+do
+        samtools view $i | grep YT:Z:CP >> $b/$c
+done
 
-###############################################################################################################################################################################
-##### This is the command we used for getting the observed template size from the SAM files , you would need to change the input file as we don't want to make it chaotic #####
-###############################################################################################################################################################################
 
-cut -f 9 concordant_alignment_C13F2_21_CO_sorted_reheader > outputfile
+#################################################################################################
+##### This is the command we used for getting the observed template size from the SAM files #####
+#################################################################################################
+
+cut -f 9 $b/$c > $b/$d
