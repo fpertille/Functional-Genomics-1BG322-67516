@@ -11,4 +11,4 @@ f=MeDIP.R2.nopoliG.fastq.gz #name of the R2 input
 a=/path/to/demultiplexed/folder
 c=/path/to/barcode/file/barcode.txt
 
-process_radtags -P -1 $h/$g -2 $h/$f -o $a -b $c -e pstI -r -q -c
+process_radtags -P -1 $h/$g -2 $h/$f -o $a -b $c -e pstI -r -q -c --len-limit 20
