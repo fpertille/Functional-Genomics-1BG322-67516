@@ -4,6 +4,11 @@
 
 grep YT:Z:CP C13F2_21_CO_sorted_reheader.sam > concordant_alignment_C13F2_21_CO_sorted_reheader
 
+#Alternative to use the bam file
+#module load bioinfo-tools
+#module load samtools
+#samtools view C13F2_21_CO_sorted_reheader.bam | grep YT:Z:CP > concordant_alignment_C13F2_21_CO_sorted_reheader
+
 ###############################################################################################################################################################################
 ##### This is the command we used for getting the observed template size from the SAM files , you would need to change the input file as we don't want to make it chaotic #####
 ###############################################################################################################################################################################
