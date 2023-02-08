@@ -6,7 +6,7 @@ module load bioinfo-tools
 module load fastp
 i=/path/to/R1_001.fastq.gz
 j=/path/to/R2_001.fastq.gz
-h=/path/to/results/folder
+h=/path/to/filter/folder
 g=MeDIP.R1.nopoliG.fastq.gz #name of the R1 output
 f=MeDIP.R2.nopoliG.fastq.gz #name of the R2 output
 w=MeDIP.nopoliG.html #name of the report
