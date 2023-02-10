@@ -20,3 +20,5 @@ module load subread
 # FeatureCounts recognices the windows in the BAM file and produces a count matrix, this count matrix is going to be later used to do the statistic to see the differential methylated windows
 featureCounts -t sequence_feature -g gene_id -p -B -a $i/$h -o $j/counts.$b.txt $k/*.bam
 
+# featureCounts tool to quantify the reads mapped to features, such as genes or exons, in BAM files specified by $k/*.bam. The -t option specifies the type of features, the -g option specifies the identifier for the features, the -p option enables the counting of paired-end reads, the -B option enables the counting of both reads for paired-end reads that have one end mapped, and the -a option specifies the annotation file in the GTF format. The -o option specifies the output file. The counts for each feature are stored in the specified output file in the tab-delimited format.
+
