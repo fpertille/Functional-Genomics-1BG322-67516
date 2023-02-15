@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH -A snic2022-22-432
+#SBATCH -A uppmax2023-2-10
 #SBATCH -p core -n 1
 #SBATCH --mem=64gb
 #SBATCH -t 24:00:00
