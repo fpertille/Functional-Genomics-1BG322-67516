@@ -11,7 +11,17 @@ f=MeDIP.R2.nopoliG.fastq.gz #name of the R2 input
 a=/path/to/demultiplexed/folder
 c=/path/to/barcode/file/barcode.txt
 
-process_radtags -P -1 $h/$g -2 $h/$f -o $a -b $c -e pstI -r -q -c --len-limit 20
+process_radtags --threads 4  -P -1 $h/$g -2 $h/$f -o $a -b $c -e pstI -r -q -c --len-limit 20
 
-
-# process_radtags tool to process paired-end fastq files specified by $h/$g and $h/$f and output the processed files to the directory specified by $a. The -P option indicates that the input is paired-end, the -1 and -2 options specify the input files, the -o option specifies the output directory, the -b option specifies the barcode file, the -e option specifies the restriction enzyme used, the -r option enables quality filtering, the -q option disables low-quality filtering, and the -c option specifies the correction method. The --len-limit option specifies the minimum length of reads to retain.
+#--threads 4 indicates that the program will use 4 threads to process the data.
+#-P specifies that the input files are paired-end reads.
+#-1 $h/$g and -2 $h/$f indicate the paths to the input files for the forward and reverse reads, respectively. The $h variable is a placeholder for the path to the filter folder, and $g and $f are the names of the input files for the forward and reverse reads.
+#-o $a specifies the path to the output directory for the processed files. The $a variable is a placeholder for the path to the demultiplexed folder.
+#-b $c indicates the path to the file containing the barcode sequences used to demultiplex the reads. The $c variable is a placeholder for the path to the barcode file.
+#-e pstI specifies the restriction enzyme used to generate the RAD-seq library.
+#-r indicates that the program should trim the reads to remove the restriction enzyme site.
+#-q specifies that the program should perform quality filtering on the reads.
+##by default, process_radtags uses a sliding window quality filter to remove reads with average quality scores below a certain threshold. This threshold is set to 20 by default, but it can be adjusted using the -y flag.
+###The sliding window quality filter works by calculating the average quality score of a sliding window of a fixed length (by default, 15 bp) along each read. If the average quality score falls below the specified threshold, the read is discarded.
+#-c indicates that the program should discard any reads that do not match the barcode.
+#--len-limit 20 specifies the maximum length of the reads to be retained after trimming. Any reads longer than 20 bp will be discarded.
