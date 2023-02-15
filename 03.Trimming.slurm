@@ -1,3 +1,12 @@
+#!/bin/bash -l
+#SBATCH -A snic2022-22-432
+#SBATCH -p core -n 1
+#SBATCH --mem=64gb
+#SBATCH -t 24:00:00
+#SBATCH -J trimm
+#SBATCH --error /error_path/00.FastpLane1.err
+#SBATCH --output /output_path/00.FastpLane1.out
+
 ##################################################################################################################################
 ##### This is the command we used for filtering, here you can see the filter for trimming adapters and trimming of poliG > 2 #####
 ##################################################################################################################################
