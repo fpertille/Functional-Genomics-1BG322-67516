@@ -1,3 +1,12 @@
+#!/bin/bash -l
+#SBATCH -A snic2022-22-432
+#SBATCH -p core -n 1
+#SBATCH --mem=64gb
+#SBATCH -t 24:00:00
+#SBATCH -J trimm
+#SBATCH --error /error_path/00.PreparingInSilicoFile.err
+#SBATCH --output /output_path/00.PreparingInSilicoFile.out
+
 ############################################################################################
 #### the output from 02.in_silico_digestion_PstIGal7.R should be uploaded to the server ####
 ############################################################################################
