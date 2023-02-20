@@ -1,4 +1,25 @@
-#Violeta, can you fix it the way you did with the otherones?
+#!/bin/bash -l
+#SBATCH -A uppmax2023-2-10
+#SBATCH -M snowy
+#SBATCH -p core -n 1
+#SBATCH --mem=64gb
+#SBATCH -t 24:00:00
+#SBATCH -J trimm
+#SBATCH --error /error_path/01.BowtieIndexGal7.err
+#SBATCH --output /output_path/01.BowtieIndexGal7.out
+
+###################################################
+##### This is the command we used to create the index#####
+###################################################
+
+module load bioinfo-tools
+module load bowtie2/2.4.5
+
+###nEED fix##########
+a=/path/to/list/of/FASTAfile/
+b=/path/to/reference/genome/reference.genome
+c=/path/to/the/output/
+
 bowtie2-build /proj/gbs_medip/forgeGenome/Galgal7/ncbi_dataset/data/GCF_016699485.2/seqs_srcdir/newgenomeclean.fa /proj/gbs_medip/uppstore2017266/analysis/genomes/Galgal7/Galgal7
 
 #The command bowtie2-build is used to create an index of a reference genome in order to align reads from sequencing data to the genome. 
