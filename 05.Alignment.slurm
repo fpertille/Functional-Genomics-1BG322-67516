@@ -1,3 +1,13 @@
+#!/bin/bash -l
+#SBATCH -A uppmax2023-2-10
+#SBATCH -M snowy
+#SBATCH -p core -n 1
+#SBATCH --mem=64gb
+#SBATCH -t 24:00:00
+#SBATCH -J trimm
+#SBATCH --error /error_path/05.Alignment.err
+#SBATCH --output /output_path/05.Alignment.out
+
 ###################################################
 ##### This is the command we used for aligning#####
 ###################################################
