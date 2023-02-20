@@ -37,4 +37,12 @@ design.list <- na.omit(design.list, cols=c("blindtreatment"))
 #save as an R object for the sake of memory performance
 save(design.list,file = "C:/Users/your_user/your_path/design.list")
 
-# The normalization is done with EdgeR, it uses TMM normalization factor to calculate the effective library sizes
+# The normalization is done with EdgeR, it uses TMM normalization factor to calculate the effective library sizes (TMM*library size), then this effective library size is used to divide by the raw count.
+count.table.RBC.DGElist <- DGEList(counts=count.table.RBC[,c(18:156,158:175)], genes=geneID)
+rownames(count.table.RBC.DGElist$counts) <- rownames(count.table.RBC.DGElist$genes) <- geneID
+count.table.RBC.DGElist <- calcNormFactors(count.table.RBC.DGElist)
+effective.library.size.RBC= count.table.RBC.DGElist$samples$lib.size*count.table.RBC.DGElist$samples$norm.factors
+counts.final.cpm.tmm.normalized.RBC=data.frame(mapply(`*`,count.table.RBC[,c(18:156,158:175)],effective.library.size.RBC))
+row.names(counts.final.cpm.tmm.normalized.RBC)=geneID
+save(counts.final.cpm.tmm.normalized.RBC,file = "C:/Users/your_user/your_path/counts.final.cpm.tmm.normalized.RBC.rda")
+
