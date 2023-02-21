@@ -37,5 +37,5 @@ done > $i/columns9.txt
 paste $i/raw_windows.txt $i/columns9.txt >> $i/header.txt
 mv $i/header.txt $i/in_silico_windows.curated.$j.gff
 rm $i/raw_windows.txt
-rm $i/header.txt
+#rm $i/header.txt
 rm $i/columns9.txt
