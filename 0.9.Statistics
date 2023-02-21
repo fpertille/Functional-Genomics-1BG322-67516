@@ -38,8 +38,9 @@ p.values.mann.whitney$corrected_p_value = p.adjust((unlist(p.values.mann.whitney
 save(corrected_p.values.mann.whitney,file = "C:/Users/your_path/corrected_p.values.mann.whitney.rda")
 
 # Moderated t test #####
-load("C:/your_path/counts.raw.rbc")
+load("C:/your_path/count.table.final.counts.RBC.rda")
 load("C:/Users/your_path/design.list")
+counts.raw.rbc=count.table.RBC
 dge <- DGEList(counts=counts.raw.rbc[,-c(1:2)], genes=counts.raw.rbc[,1])
 rownames(dge$counts) <- rownames(dge$genes) <- counts.raw.rbc[,1]
 dge <- calcNormFactors(dge)
