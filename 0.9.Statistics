@@ -10,7 +10,7 @@ library(data.table)
 library(dplyr)
 
 # Mann-whitney ####
-load("C:/Users/your_path/count.cpm.tmm.norm.rbc")
+load("C:/Users/your_path/counts.final.cpm.tmm.normalized.RBC.rda")
 load("C:/Users/your_path/design.list")
 group.list.RBC=as.data.frame(design.list$blindtreatment)
 colnames(group.list.RBC)=c("group")
