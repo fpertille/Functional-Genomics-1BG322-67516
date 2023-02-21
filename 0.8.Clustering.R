@@ -1,16 +1,15 @@
-#clusterization####
+#clusterization ####
 setwd("C:/Users/your_user/")
 #install.packages("reshape")
 #install.packages("kohonen")
 #install.packages("RColorBrewer")
-install.packages("factoextra")
+#install.packages("factoextra")
 library(writexl)
 library(plyr)
 library(tidyverse)
 library(hrbrthemes)
 library(viridis)
 library(forcats)
-library(hrbrthemes)
 library(ggplot2)
 library(extrafont)
 library(ggpubr)
