@@ -1,7 +1,12 @@
 #In first place there will be some formatting of the data as FeatureCounts does include information that is not relevant for the whole analysis. 
 #From the metadata that we extracted in the SAM files we got the template length, this is useful to filter in the count matrix that range. 
 #In this project we are going to compare between two groups, stressed and non-stressed. To avoid bias the groups are coded as crocodile and elephant.
-#RBC_154 has been excluded as it does not have a grouping factor. 
+#RBC_154 has been excluded as it does not have a grouping factor.
+library(tidyverse)
+library(dplyr)
+library(tibble)
+library(tidyverse)
+
 setwd("C:/Users/your_user/")
 count.table.RBC = fread(file= paste0(getwd(),"","/count_matrix/counts.matrix.RBC.galgal7.txt"))
 
@@ -19,7 +24,7 @@ count.table.RBC$Geneid= gsub(" ","_", count.table.RBC$Geneid)
 save(count.table.RBC,file = "C:/Users/your_user/your_path/count.table.final.counts.RBC.rda")
 
 #Selecting individual identification and the variable columns
-ind.chicken=read.csv(file= paste0(getwd(),"","/EpiAllInfo_comma.csv"),sep = ";")
+ind.chicken=read.csv(file= paste0(getwd(),"","/EpiAllInfo_comma.csv"),sep = ",")
 ind.chicken=ind.chicken[,c(1,41)]
 ind.RBC=colnames(count.table.RBC)
 ind.RBC=gsub(pattern = "RBC_", replacement = "", x = ind.RBC)
@@ -38,11 +43,11 @@ design.list <- na.omit(design.list, cols=c("blindtreatment"))
 save(design.list,file = "C:/Users/your_user/your_path/design.list")
 
 # The normalization is done with EdgeR, it uses TMM normalization factor to calculate the effective library sizes (TMM*library size), then this effective library size is used to divide by the raw count.
-count.table.RBC.DGElist <- DGEList(counts=count.table.RBC[,c(18:156,158:175)], genes=geneID)
-rownames(count.table.RBC.DGElist$counts) <- rownames(count.table.RBC.DGElist$genes) <- geneID
+count.table.RBC.DGElist <- DGEList(counts=count.table.RBC[,c(18:156,158:175)], genes=rownames(count.table.RBC))
+rownames(count.table.RBC.DGElist$counts) <- rownames(count.table.RBC.DGElist$genes) <- rownames(count.table.RBC)
 count.table.RBC.DGElist <- calcNormFactors(count.table.RBC.DGElist)
 effective.library.size.RBC= count.table.RBC.DGElist$samples$lib.size*count.table.RBC.DGElist$samples$norm.factors
 counts.final.cpm.tmm.normalized.RBC=data.frame(mapply(`*`,count.table.RBC[,c(18:156,158:175)],effective.library.size.RBC))
-row.names(counts.final.cpm.tmm.normalized.RBC)=geneID
+row.names(counts.final.cpm.tmm.normalized.RBC)=rownames(count.table.RBC)
 save(counts.final.cpm.tmm.normalized.RBC,file = "C:/Users/your_user/your_path/counts.final.cpm.tmm.normalized.RBC.rda")
 
