@@ -4,12 +4,14 @@
 module load bioinfo-tools
 module load samtools
 
-a=/path/to/bam/list/bam.list.txt
+a=/path/to/bam
+ls -d "$a"/*.bam > $a/bam.list.txt
+e=$a/bam.list.txt
 b=/path/to/results
 c=name_for_file_containing_concordant_alignments.txt
 d=name_for_template_size.txt
 
-for i in $(cat $a);
+for i in $(cat $e);
 do
         samtools view $i | grep YT:Z:CP >> $b/$c
 done
