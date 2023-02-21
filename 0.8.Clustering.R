@@ -46,7 +46,7 @@ graph.cluster=fviz_cluster(kcluster.3, data = count.scaled.table.RBC)
 load("C:/Users/viode560/Documents/GBSMeDIP_workpipeline/count.table.final.counts.RBC.rda")
 count.table.RBC=cbind(as.data.frame(row.names(count.table.RBC)),count.table.RBC)
 names(count.table.RBC)[names(count.table.RBC) == "row.names(count.table.RBC)"] <- 'gene'
-count.table.raw.RBC=left_join(cluster.rbc,count.table.RBC,by="gene")
+count.table.raw.RBC=left_join(k.means.cluster.metadata.RBC,count.table.RBC,by="gene")
 save(count.table.raw.RBC,file = "C:/Users/viode560/Documents/GBSMeDIP_workpipeline/count.table.final.counts.RBC.rda")
 
 # Adding a cluster columm to the normalized count matrix #####
@@ -54,5 +54,5 @@ load("C:/Users/viode560/Documents/GBSMeDIP_workpipeline/counts.final.cpm.tmm.nor
 gene=as.data.frame(row.names(counts.final.cpm.tmm.normalized.RBC))
 counts.final.cpm.tmm.normalized.RBC=cbind(as.data.frame(row.names(counts.final.cpm.tmm.normalized.RBC)),counts.final.cpm.tmm.normalized.RBC)
 names(counts.final.cpm.tmm.normalized.RBC)[names(counts.final.cpm.tmm.normalized.RBC) == "row.names(counts.final.cpm.tmm.normalized.RBC))"] <- 'gene'
-counts.final.cpm.tmm.normalized.RBC=left_join(cluster.rbc,counts.final.cpm.tmm.normalized.RBC,by="gene")
+counts.final.cpm.tmm.normalized.RBC=left_join(k.means.cluster.metadata.RBC,counts.final.cpm.tmm.normalized.RBC,by="gene")
 save(counts.final.cpm.tmm.normalized.RBC,file = "C:/Users/viode560/Documents/GBSMeDIP_workpipeline/counts.final.cpm.tmm.normalized.RBC.rda")
