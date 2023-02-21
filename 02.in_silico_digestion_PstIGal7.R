@@ -13,8 +13,9 @@ library(stringr)
 library(genomation)
 library(plyr)
 
-setwd("/local/path/")
-
+#setwd("/local/path/mainpath")
+setwd(paste0(getwd())
+      
 ########### Constructing PstI digestion in silico in Gallus gallus 7 #################
 # Identify the PstI recongnition sites for each chromosomal entry
 # Generate a dataframe with the length of PstI digested fragments
@@ -45,7 +46,9 @@ for (i in seq_along(Ggallus)){
 #Overall, this code block is identifying PstI restriction enzyme cut sites in the Gallus gallus genome and creating a data frame (mdf.Ggallus) to store the start and end positions of each cut site on each chromosome.
 
 # Now export directly the bed file as gff2/gtf format
+setwd(paste0(getwd(),"","/branchfile/"))
 export(mdf.Ggallus, "in_silico_windows_galgal7.gff", format = "gtf")
+
 
 #This code exports the data frame mdf.Ggallus to a GFF (Generic Feature Format) file called "in_silico_windows_galgal7.gff" using the export() function from the rtracklayer package in R.
 #The first argument to export() is the data frame to be exported (mdf.Ggallus), and the second argument is the name of the output file ("in_silico_windows_galgal7.gff"). The format argument is specified as "gtf", which is a format that is similar to GFF but with some minor differences.
