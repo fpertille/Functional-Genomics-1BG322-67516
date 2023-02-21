@@ -26,6 +26,11 @@ for (i in seq_along(Ggallus)){
   ends<-end(gaps(m))
   temp_df<-data.frame(start=starts-5,end=ends+1,chr=seqnames(Ggallus)[i]) #actually end = ends
   temp_df$start<-replace(temp_df$start, temp_df$start <= 0, 1)
+# Subtract 1 from the end value for the last row of each chromosome
+  if (i == length(Ggallus) || seqnames(Ggallus)[i] != seqnames(Ggallus)[i+1]) {
+    last_row <- nrow(temp_df)
+    temp_df[last_row, "end"] <- temp_df[last_row, "end"] - 1
+  }
   mdf.Ggallus<-rbind(mdf.Ggallus,temp_df)
 }
 
