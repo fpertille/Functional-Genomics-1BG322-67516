@@ -6,6 +6,7 @@ library(tidyverse)
 library(dplyr)
 library(tibble)
 library(tidyverse)
+library(data.table)
 
 setwd("C:/Users/your_user/")
 count.table.RBC = fread(file= paste0(getwd(),"","/count_matrix/counts.matrix.RBC.galgal7.txt"))
