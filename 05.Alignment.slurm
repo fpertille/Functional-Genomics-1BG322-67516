@@ -16,7 +16,6 @@ module load bioinfo-tools
 module load bowtie2/2.4.5
 module load samtools/1.14
 
-a=/path/to/list/of/fastq/
 b=/path/to/reference/genome/reference.genome
 c=/path/to/the/output/
 
