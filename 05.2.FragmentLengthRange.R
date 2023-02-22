@@ -7,6 +7,12 @@ setwd("/local/path/")
 #read the txt file that was produced in 05.1. FragmentLengthRange.slurm
 template.length=read.table("C:/Users/viode560/Documents/statistics_work/template_size/template_length.txt", sep="\t", header=FALSE)
 
+#alternatively- can be significantly faster
+library(data.table)
+template.length <- fread("template_length.txt", 
+                          sep = "\t", 
+                          header = FALSE))
+
 # visualization in the form of an histogram
 hist(abs(template.length$V1), main = "Template length hypothalamus", xlab = "Base pairs")
 
