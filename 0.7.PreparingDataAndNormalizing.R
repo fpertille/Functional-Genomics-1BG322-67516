@@ -9,7 +9,7 @@ library(tidyverse)
 library(data.table)
 library(edgeR)
 
-setwd("C:/Users/your/user")
+setwd("C:/Users/viode560/Documents/GBSMeDIP_workpipeline")
 count.table.RBC = fread(file= paste0(getwd(),"","/count_matrix/counts.matrix.RBC.galgal7.txt"))
 
 # We are going to filter for the maximum and minimum template length of the library, script [05.2.FragmentLengthRange.R]
@@ -23,10 +23,10 @@ count.table.RBC <- count.table.RBC[,2:ncol(count.table.RBC)]
 colnames(count.table.RBC) <- sapply(strsplit(colnames(count.table.RBC), "/\\s*"), tail, 1)
 colnames(count.table.RBC)<- gsub(pattern = ".sorted.bam", replacement = "", x = colnames(count.table.RBC))
 rownames(count.table.RBC) <- paste0(count.table.RBC$Chr, ":", count.table.RBC$Start, "-", count.table.RBC$End)
-count.table.RBC$Geneid=lapply(count.table.RBC$Geneid, function(x) paste('window', x))
-count.table.RBC$Geneid= gsub(" ","_", count.table.RBC$Geneid)
 #save as an R object for the sake of memory performance
-save(count.table.RBC,file= paste0(getwd(),"","/count.table.final.counts.RBC.rda")
+count.table.RBC=count.table.RBC%>%mutate(location= paste0(count.table.RBC$Chr, ":", count.table.RBC$Start, "-", count.table.RBC$End))
+count.table.RBC=count.table.RBC[,c(193,17:155,157:175)]
+save(count.table.RBC,file = "C:/Users/viode560/Documents/GBSMeDIP_workpipeline/count.table.final.counts.RBC.rda")
 
 #Selecting individual identification and the variable columns
 ind.chicken=read.csv(file= paste0(getwd(),"","/EpiAllInfo_comma.csv"),sep = ",")
@@ -45,13 +45,12 @@ design.list[design.list==""]<-NA
 design.list[design.list=="Eggs"]<-NA
 design.list <- na.omit(design.list, cols=c("blindtreatment"))
 #save as an R object for the sake of memory performance
-save(design.list,file= paste0(getwd(),"","/design.list")
+save(design.list,file = "C:/Users/viode560/Documents/GBSMeDIP_workpipeline/design.list")
 
 # The normalization is done with EdgeR, it uses TMM normalization factor to calculate the effective library sizes (TMM*library size), then this effective library size is used to divide by the raw count.
-count.table.RBC.DGElist <- DGEList(counts=count.table.RBC[,c(17:155,157:175)], genes=rownames(count.table.RBC))
+count.table.RBC.DGElist <- DGEList(counts=count.table.RBC[,-1], genes=count.table.RBC[,1])
 rownames(count.table.RBC.DGElist$counts) <- rownames(count.table.RBC.DGElist$genes) <- rownames(count.table.RBC)
 count.table.RBC.DGElist <- calcNormFactors(count.table.RBC.DGElist)
 effective.library.size.RBC= count.table.RBC.DGElist$samples$lib.size*count.table.RBC.DGElist$samples$norm.factors
-counts.final.cpm.tmm.normalized.RBC=data.frame(mapply(`*`,count.table.RBC[,c(17:155,157:175)],effective.library.size.RBC))
-row.names(counts.final.cpm.tmm.normalized.RBC)=rownames(count.table.RBC)
-save(counts.final.cpm.tmm.normalized.RBC,file = "file= paste0(getwd(),"","/counts.final.cpm.tmm.normalized.RBC.rda")
+counts.final.cpm.tmm.normalized.RBC=data.frame(count.table.RBC[,1],mapply(`*`,count.table.RBC[,c(2:159)],effective.library.size.RBC))
+save(counts.final.cpm.tmm.normalized.RBC,file = "C:/Users/viode560/Documents/GBSMeDIP_workpipeline/counts.final.cpm.tmm.normalized.RBC.rda")
