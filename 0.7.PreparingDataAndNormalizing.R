@@ -13,12 +13,11 @@ setwd("C:/Users/your_user/")
 count.table.RBC = fread(file= paste0(getwd(),"","/count_matrix/counts.matrix.RBC.galgal7.txt"))
 
 # We are going to filter for the maximum and minimum template length of the library, script [05.2.FragmentLengthRange.R]
-setwd(paste0(getwd(),"","branchfile/"))
-load(stats.rda)
+load(paste0(getwd(),"","/stats.rda"))
 #ideally we want to load(stats) from script 05.2 and add a command to the next two line to automatically take these two values
-#we take the maximum and minum from stats 
-count.table.RBC=count.table.RBC%>%filter(Length<<maximum_length>)
-count.table.RBC=count.table.RBC%>%filter(Length><minimum_length>)
+#we take the maximum and minum from stats, stats is a summary object, is always going to be a vector where the minimum is the first string of it and the maximum is the sixth string.
+count.table.RBC=count.table.RBC%>%filter(Length<stats.RBC[6])
+count.table.RBC=count.table.RBC%>%filter(Length>stats.RBC[1])
 # Do some formatting of the matrix
 count.table.RBC <- count.table.RBC[,2:ncol(count.table.RBC)]
 colnames(count.table.RBC) <- sapply(strsplit(colnames(count.table.RBC), "/\\s*"), tail, 1)
