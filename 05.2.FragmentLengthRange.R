@@ -16,3 +16,4 @@ hist(abs(template.length$V1), main = "Template length hypothalamus", xlab = "Bas
 
 #summary to have the minimum and maximum window length
 stats=summary(abs(template.length$V1))
+save(stats, file= paste0(getwd(),"","/branchfile/stats.rda"))
