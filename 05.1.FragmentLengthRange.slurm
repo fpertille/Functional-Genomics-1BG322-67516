@@ -27,7 +27,7 @@ done
 #################################################################################################
 
 cut -f 9 $b/$c > $b/$d
-
+rm $c
 #This code is a shell command that uses the cut command to extract the ninth field from a file specified by the variable $b/$c, which is the same file that was created in the previous code block.
 #The extracted field is then redirected using the > operator to a new file specified by the variable $b/$d.
 #Overall, this command appears to be extracting the ninth field (which likely corresponds to a sequence read) from a file, and saving the output to a new file.
