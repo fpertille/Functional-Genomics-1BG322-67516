@@ -13,7 +13,7 @@ setwd("C:/Users/your_user/")
 count.table.RBC = fread(file= paste0(getwd(),"","/count_matrix/counts.matrix.RBC.galgal7.txt"))
 
 # We are going to filter for the maximum and minimum template length of the library, script [05.2.FragmentLengthRange.R]
-setwd(getwd(),"","/branchfile/"))
+setwd(paste0(getwd(),"","branchfile/"))
 load(stats.rda)
 #ideally we want to load(stats) from script 05.2 and add a command to the next two line to automatically take these two values
 #we take the maximum and minum from stats 
