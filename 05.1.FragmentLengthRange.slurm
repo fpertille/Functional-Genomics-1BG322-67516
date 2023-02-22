@@ -5,13 +5,11 @@ module load bioinfo-tools
 module load samtools
 
 a=/path/to/bam
-ls -d "$a"/*.bam > $a/bam.list.txt
-e=$a/bam.list.txt
 b=/path/to/results
-c=name_for_file_containing_concordant_alignments.txt
-d=name_for_template_size.txt
+c=concordantAlignments.txt
+d=template_size.txt
 
-for i in $(cat $e);
+for i in `ls $a/*.bam`;
 do
         samtools view $i | grep YT:Z:CP >> $b/$c
 done
@@ -27,7 +25,8 @@ done
 #################################################################################################
 
 cut -f 9 $b/$c > $b/$d
-rm $c
+rm $b/concordantAlignments.txt
+
 #This code is a shell command that uses the cut command to extract the ninth field from a file specified by the variable $b/$c, which is the same file that was created in the previous code block.
 #The extracted field is then redirected using the > operator to a new file specified by the variable $b/$d.
 #Overall, this command appears to be extracting the ninth field (which likely corresponds to a sequence read) from a file, and saving the output to a new file.
