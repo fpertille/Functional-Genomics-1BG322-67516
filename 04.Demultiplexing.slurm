@@ -29,9 +29,9 @@ process_radtags --threads 4  -P -1 $h/$g -2 $h/$f -o $a -b $c -e pstI -r -q -c -
 #-o $a specifies the path to the output directory for the processed files. The $a variable is a placeholder for the path to the demultiplexed folder.
 #-b $c indicates the path to the file containing the barcode sequences used to demultiplex the reads. The $c variable is a placeholder for the path to the barcode file.
 #-e pstI specifies the restriction enzyme used to generate the RAD-seq library.
-#-r indicates that the program should trim the reads to remove the restriction enzyme site.
+#-r ,--rescue — rescue barcodes and RAD-Tag cut sites.
 #-q specifies that the program should perform quality filtering on the reads.
 ##by default, process_radtags uses a sliding window quality filter to remove reads with average quality scores below a certain threshold. This threshold is set to 20 by default, but it can be adjusted using the -y flag.
 ###The sliding window quality filter works by calculating the average quality score of a sliding window of a fixed length (by default, 15 bp) along each read. If the average quality score falls below the specified threshold, the read is discarded.
-#-c indicates that the program should discard any reads that do not match the barcode.
+#-c --clean — clean data, remove any read with an uncalled base.
 #--len-limit 20 specifies the maximum length of the reads to be retained after trimming. Any reads longer than 20 bp will be discarded.
