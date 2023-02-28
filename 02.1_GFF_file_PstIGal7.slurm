@@ -16,7 +16,7 @@
 i=/path/to/folder
 #output from 02.in_silico_digestion_PstIGal7.R
 h=in_silico_windows_galgal7.gff
-#code for the reference genome in use
+#code for the reference genome in use, this will be used in the output file: in_silico_windows.curated.$j.gff
 j=galgal7
 
 # extracting the header of the gff file
