@@ -1,8 +1,8 @@
-# GEroNIMO_bioinfo
+# Functional Genomics
 
-Hello and welcome to the GEroRIMO workshop on GBS-MeDIP data analysis! 
+Hello and welcome to the Functional Genomics lab on GBS-MeDIP data analysis! 
 
-The objective of this workshop is to guide the attendees in transferring the data from 
+The objective of this lab is to guide you in transferring the data from 
 i) the facility to the server where the analyses will be performed to 
 ii) basic downstream analyses of the identified differentially methylated regions (DMRs).
 
@@ -17,6 +17,6 @@ iii) annotate where the DMRs are located in relation to genes within the referen
 iv) generate a final spreadsheet that compiles all the information generated.
 
 
-On behalf of Carlos, Violeta, Manolis, and me.
+On behalf of Fabio Pertille and TAs.
 Best regards, 
 
