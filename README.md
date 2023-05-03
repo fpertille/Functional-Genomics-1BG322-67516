@@ -1,6 +1,6 @@
 # Functional Genomics
 
-Hello and welcome to the Functional Genomics lab on GBS-MeDIP data analysis! 
+Hello and welcome to the Functional Genomics lab 2! 
 
 LAB 2 - "Mastering Bash: Learning Basic Commands and Scripting for Omic Analysis"
 
