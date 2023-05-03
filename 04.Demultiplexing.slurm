@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH -A uppmax2023-2-10
+#SBATCH -A uppmax2022-2-30
 #SBATCH -M snowy
 #SBATCH -p core -n 1
 #SBATCH --mem=64gb
