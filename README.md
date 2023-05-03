@@ -9,6 +9,10 @@ Participants will learn how to navigate the file system, manipulate files and di
 In addition to learning the basics of Bash scripting, we will also delve into topics such as how a Slurm queue system works, how to manage the environment using the module system, and how to transfer data efficiently.
 By the end of this course, participants will have gained practical skills and knowledge necessary to work with genomic data in a Unix-based environment, as well as familiarity with the computational infrastructure used by many research institutions in Sweden.
 
+Here you can find the whole workflow for the GBS-MeDIP method, it is not ready for publication, but it is in development,
+You will select only two scripts to run, please, check in your manual which one of them you are going to upload to Uppmax!
+
+
 On behalf of Fabio Pertille and TAs.
 Best regards, 
 
