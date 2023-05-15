@@ -18,6 +18,7 @@ module load samtools/1.14
 
 b=/path/to/reference/genome/reference.genome
 c=/path/to/the/output/
+a=/path/to/the/demultiplexed/files
 
 #Changing the current directory: The script first changes the current working directory to the directory specified by the $a variable.
 cd $a
